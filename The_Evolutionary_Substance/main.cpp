@@ -126,23 +126,19 @@ public:
     }
 
     void period() {
-        vector<int> deleteList;
-        
-        for (int i = 0; i < this->freedom.size(); i++) {
-            this->freedom[i]->setDaysLived(this->freedom[i]->getDaysLived() + 1);
-            if (this->freedom[i]->getDaysLived() > 10) {
-                deleteList.push_back(i);
-            }
-            if (dynamic_cast<Monster*>(this->freedom[i])) {
-                deleteList.push_back(i);
+        auto i = freedom.begin();
+        while (i != freedom.end()) {
+            T* animal = *i;
+            animal->setDaysLived(animal->getDaysLived() + 1);
+            if (animal->getDaysLived() > 10 || dynamic_cast<Monster*>(animal)) {
+                cout << animal->getName() << " has died of old days\n";
+                delete animal;
+                i = freedom.erase(i);
+            } else {
+                ++i;
             }
         }
-
-        for (int i = deleteList.size() - 1; i >= 0; i--) {
-            cout << this->freedom[deleteList[i]]->getName() << " has died of old days\n";
-            delete this->freedom[deleteList[i]];
-            this->freedom.erase(this->freedom.begin() + deleteList[i]);
-        }
+        this->sortFreedom();
     }
 
     void print() {
@@ -189,20 +185,19 @@ public:
     }
 
     void period() {
-        vector<int> deleteList;
-
-        for (int i = 0; i < this->cage.size(); i++) {
-            this->cage[i]->setDaysLived(this->cage[i]->getDaysLived() + 1);
-            if (this->cage[i]->getDaysLived() > 10) {
-                deleteList.push_back(i);
+        auto i = cage.begin();
+        while (i != cage.end()) {
+            T* animal = *i;
+            animal->setDaysLived(animal->getDaysLived() + 1);
+            if (animal->getDaysLived() > 10) {
+                cout << animal->getName() << " has died of old days\n";
+                delete animal;
+                i = cage.erase(i);
+            } else {
+                ++i;
             }
         }
-
-        for (int i = deleteList.size() - 1; i >= 0; i--) {
-            cout << this->cage[deleteList[i]]->getName() << " has died of old days\n";
-            delete this->cage[deleteList[i]];
-            this->cage.erase(this->cage.begin() + deleteList[i]);
-        }
+        this->sortCage();
     }
 
     void talk(int index) {
@@ -303,20 +298,19 @@ public:
     }
 
     void period() {
-        vector<int> deleteList;
-        
-        for (int i = 0; i < this->aquarium.size(); i++) {
-            this->aquarium[i]->setDaysLived(this->aquarium[i]->getDaysLived() + 1);
-            if (this->aquarium[i]->getDaysLived() > 10) {
-                deleteList.push_back(i);
+        auto i = aquarium.begin();
+            while (i != aquarium.end()) {
+                T* animal = *i;
+                animal->setDaysLived(animal->getDaysLived() + 1);
+                if (animal->getDaysLived() > 10) {
+                    cout << animal->getName() << " has died of old days\n";
+                    delete animal;
+                    i = aquarium.erase(i);
+                } else {
+                    ++i;
+                }
             }
-        }
-
-        for (int i = deleteList.size() - 1; i >= 0; i--) {
-            cout << this->aquarium[deleteList[i]]->getName() << " has died of old days\n";
-            delete this->aquarium[deleteList[i]];
-            this->aquarium.erase(this->aquarium.begin() + deleteList[i]);
-        }
+        this->sortAquarium();
     }
 
     void talk(int index) {
@@ -710,13 +704,14 @@ int main() {
                 {
                     int pos;
                     string type, container;
-                    cin >> container >> type >> pos;
-
+                    cin >> container;
                     // Freedom
                     if (container[0] == 'F') {
+                        cin >> pos;
                         freedom.talk(pos);
                         break;
                     }
+                    cin >> type >> pos;
                     
                     // Mouse
                     if (type == "M") {
@@ -776,23 +771,14 @@ int main() {
                 {
                     // Adding +1 day to all animals in the Containers and sorting by days lived
                     cageBirds.period();
-                    cageBirds.sortCage();
                     cageBetterBirds.period();
-                    cageBetterBirds.sortCage();
                     cageMouses.period();
-                    cageMouses.sortCage();
                     cageBetterMouses.period();
-                    cageBetterMouses.sortCage();
                     aquariumFish.period();
-                    aquariumFish.sortAquarium();
                     aquariumBetterFish.period();
-                    aquariumBetterFish.sortAquarium();
                     aquariumMouses.period();
-                    aquariumMouses.sortAquarium();
                     aquariumBetterMouses.period();
-                    aquariumBetterMouses.sortAquarium();
                     freedom.period();
-                    freedom.sortFreedom();
                     break;
                 }
             // PRINT
@@ -800,8 +786,12 @@ int main() {
                 {
                     cout << "Mouses\n";
                     cageMouses.print();
+                    cout << "Mouses aqua\n";
+                    aquariumMouses.print();
                     cout << "Better Mouses\n";
                     cageBetterMouses.print();
+                    cout << " Beteer Mouses aqua\n";
+                    aquariumBetterMouses.print();
                     cout << "Fish\n";
                     aquariumFish.print();
                     cout << "Better Fish\n";
