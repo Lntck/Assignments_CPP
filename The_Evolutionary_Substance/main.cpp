@@ -2,11 +2,9 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
-
-// TO DO
-// ADD variant where Better Animals becomes Monsters
 
 
 class Animal {
@@ -105,10 +103,71 @@ public:
 class Monster : public virtual BetterFish, public virtual BetterBird, public virtual BetterMouse {
 public:
     Monster(string name) : Animal(name, 0), Fish(name, 0), Bird(name, 0), Mouse(name, 0), BetterFish(name, 0), BetterBird(name, 0), BetterMouse(name, 0) {}
-    Monster(Animal& other) : Animal(other), Fish(other.getName(), other.getDaysLived()), Bird(other.getName(), other.getDaysLived()), Mouse(other.getName(), other.getDaysLived()), BetterFish(other.getName(), other.getDaysLived()), BetterBird(other.getName(), other.getDaysLived()), BetterMouse(other.getName(), other.getDaysLived()) {}
+    Monster(Animal& other) : Animal(other.getName(), 0), Fish(other.getName(), 0), Bird(other.getName(), 0), Mouse(other.getName(), 0), BetterFish(other.getName(), 0), BetterBird(other.getName(), 0), BetterMouse(other.getName(), 0) {}
 
     void attack(Animal& other) override {
         cout << "Monster is attacking\n";
+    }
+};
+
+
+template <typename T>
+class Freedom {
+private:
+    vector<T*> freedom;
+public:
+    using value_type = T;
+    Freedom() {}
+
+    void addAnimal(T* animal, int flag) {
+        this->freedom.push_back(animal);
+        if (flag) { animal->sayName();}
+        this->sortFreedom();
+    }
+
+    void period() {
+        vector<int> deleteList;
+        
+        for (int i = 0; i < this->freedom.size(); i++) {
+            this->freedom[i]->setDaysLived(this->freedom[i]->getDaysLived() + 1);
+            if (this->freedom[i]->getDaysLived() > 10) {
+                deleteList.push_back(i);
+            }
+            if (dynamic_cast<Monster*>(this->freedom[i]) && this->freedom[i]->getDaysLived() > 1) {
+                cout << "WORKS!\n";
+                deleteList.push_back(i);
+            }
+        }
+
+        for (int i = deleteList.size() - 1; i >= 0; i--) {
+            cout << this->freedom[deleteList[i]]->getName() << " has died of old days\n";
+            delete this->freedom[deleteList[i]];
+            this->freedom.erase(this->freedom.begin() + deleteList[i]);
+        }
+    }
+
+    void print() {
+        for (auto* animal : this->freedom) {
+            animal->sayName();
+        }
+    }
+
+    void talk(int index) {
+        if (index < 0 || index >= this->freedom.size()) {
+            cout << "Animal not found\n";
+            return;
+        }
+        this->freedom[index]->sayName();
+    }
+
+    void kill_all() {
+        this->freedom.clear();
+    }
+
+    void sortFreedom() {
+        sort(this->freedom.begin(), this->freedom.end(), [](T* a, T* b) {
+            return a->getDaysLived() < b->getDaysLived();
+        });
     }
 };
 
@@ -176,13 +235,29 @@ public:
         }
 
         T* animal = this->cage[pos];
-        U* betterAnimal = new U(*animal);
+        U* betterAnimal = new U(animal->getName(), ceil(animal->getDaysLived()/2.));
         otherCage.addAnimal(betterAnimal, 0);
         this->cage.erase(this->cage.begin() + pos);
         delete animal;
     }
 
+    void applySubstance(int pos, Freedom<Animal>& freedom) {
+        if (pos < 0 || pos >= this->cage.size()) {
+            cout << "Animal not found\n";
+            return;
+        }
+
+        T* animal = this->cage[pos];
+        Monster* monster = new Monster(*animal);
+        freedom.addAnimal(monster, 0);
+        this->kill_all();
+    }
+
     void kill_all() {
+        // Deleting all animals in the cage
+        for (auto* animal : this->cage) {
+            delete animal;
+        }
         this->cage.clear();
     }
 
@@ -257,75 +332,34 @@ public:
         }
 
         T* animal = this->aquarium[pos];
-        U* betterAnimal = new U(*animal);
+        U* betterAnimal = new U(animal->getName(), ceil(animal->getDaysLived()/2.));
         otherAquarium.addAnimal(betterAnimal, 0);
         this->aquarium.erase(this->aquarium.begin() + pos);
         delete animal;
     }
 
+    void applySubstance(int pos, Freedom<Animal>& freedom) {
+        if (pos < 0 || pos >= this->aquarium.size()) {
+            cout << "Animal not found\n";
+            return;
+        }
+
+        T* animal = this->aquarium[pos];
+        Monster* monster = new Monster(*animal);
+        freedom.addAnimal(monster, 0);
+        this->kill_all();
+    }
+
     void kill_all() {
+        // Deleting all animals in the aquarium
+        for (auto* animal : this->aquarium) {
+            delete animal;
+        }
         this->aquarium.clear();
     }
 
     void sortAquarium() {
         sort(this->aquarium.begin(), this->aquarium.end(), [](T* a, T* b) {
-            return a->getDaysLived() < b->getDaysLived();
-        });
-    }
-};
-
-
-template <typename T>
-class Freedom {
-private:
-    vector<T*> freedom;
-public:
-    using value_type = T;
-    Freedom() {}
-
-    void addAnimal(T* animal, int flag) {
-        this->freedom.push_back(animal);
-        if (flag) { animal->sayName();}
-        this->sortFreedom();
-    }
-
-    void period() {
-        vector<int> deleteList;
-        
-        for (int i = 0; i < this->freedom.size(); i++) {
-            this->freedom[i]->setDaysLived(this->freedom[i]->getDaysLived() + 1);
-            if (this->freedom[i]->getDaysLived() > 10) {
-                deleteList.push_back(i);
-            }
-        }
-
-        for (int i = deleteList.size() - 1; i >= 0; i--) {
-            cout << this->freedom[deleteList[i]]->getName() << " has died of old days\n";
-            delete this->freedom[deleteList[i]];
-            this->freedom.erase(this->freedom.begin() + deleteList[i]);
-        }
-    }
-
-    void print() {
-        for (auto* animal : this->freedom) {
-            animal->sayName();
-        }
-    }
-
-    void talk(int index) {
-        if (index < 0 || index >= this->freedom.size()) {
-            cout << "Animal not found\n";
-            return;
-        }
-        this->freedom[index]->sayName();
-    }
-
-    void kill_all() {
-        this->freedom.clear();
-    }
-
-    void sortFreedom() {
-        sort(this->freedom.begin(), this->freedom.end(), [](T* a, T* b) {
             return a->getDaysLived() < b->getDaysLived();
         });
     }
@@ -340,6 +374,7 @@ public:
     Cage() = delete;
     Cage(const Cage<Fish>& other) = delete;
 };
+
 
 template <>
 class Aquarium<Bird> {
@@ -478,11 +513,11 @@ int main() {
                     else if (type == "BM") {
                         // Cage
                         if (container[0] == 'C') {
-                            //
+                            cageBetterMouses.applySubstance(pos, freedom);
                         }
                         // Aquarium
                         else if (container[0] == 'A') {
-                            //
+                            aquariumBetterMouses.applySubstance(pos, freedom);
                         }
                     }
                     // Fish
@@ -496,7 +531,7 @@ int main() {
                     else if (type == "BF") {
                         // Aquarium
                         if (container[0] == 'A') {
-                        //
+                            aquariumBetterFish.applySubstance(pos, freedom);
                         }
                     }
                     // Bird
@@ -510,7 +545,7 @@ int main() {
                     else if (type == "BB") {
                         // Cage
                         if (container[0] == 'C') {
-                            //
+                            cageBetterBirds.applySubstance(pos, freedom);
                         }
                     }
                     else { return 0; }
@@ -720,6 +755,9 @@ int main() {
                     cageBirds.print();
                     cout << "Better Birds\n";
                     cageBetterBirds.print();
+                    cout << "Freedom\n";
+                    freedom.print();
+                    break;
                 }
         }
     }
