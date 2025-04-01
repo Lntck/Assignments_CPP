@@ -712,6 +712,12 @@ int main() {
                     int pos;
                     string type, container;
                     cin >> container >> type >> pos;
+
+                    // Freedom
+                    if (container[0] == 'F') {
+                        freedom.talk(pos);
+                        break;
+                    }
                     
                     // Mouse
                     if (type == "M") {
@@ -722,10 +728,6 @@ int main() {
                         // Aquarium
                         else if (container[0] == 'A') {
                             aquariumMouses.talk(pos);
-                        }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.talk(pos);
                         }
                     }
                     // Better Mouse
@@ -738,20 +740,12 @@ int main() {
                         else if (container[0] == 'A') {
                             aquariumBetterMouses.talk(pos);
                         }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.talk(pos);
-                        }
                     }
                     // Fish
                     else if (type == "F") {
                         // Aquarium
                         if (container[0] == 'A') {
                             aquariumFish.talk(pos);
-                        }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.talk(pos);
                         }
                     }
                     // Better Fish
@@ -760,10 +754,6 @@ int main() {
                         if (container[0] == 'A') {
                             aquariumBetterFish.talk(pos);
                         }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.talk(pos);
-                        }
                     }
                     // Bird
                     else if (type == "B") {
@@ -771,20 +761,12 @@ int main() {
                         if (container[0] == 'C') {
                             cageBirds.talk(pos);
                         }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.talk(pos);
-                        }
                     }
                     // Better Bird
                     else if (type == "BB") {
                         // Cage
                         if (container[0] == 'C') {
                             cageBetterBirds.talk(pos);
-                        }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.talk(pos);
                         }
                     }
                     else { return 0; }
