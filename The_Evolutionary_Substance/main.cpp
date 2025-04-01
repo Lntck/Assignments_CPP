@@ -166,7 +166,10 @@ public:
 
     void sortFreedom() {
         sort(this->freedom.begin(), this->freedom.end(), [](T* a, T* b) {
-            return a->getDaysLived() < b->getDaysLived();
+            if (a->getDaysLived() != b->getDaysLived()) {
+                return a->getDaysLived() < b->getDaysLived();
+            }
+            return a->getName() < b->getName();
         });
     }
 };
@@ -277,7 +280,10 @@ public:
 
     void sortCage() {
         sort(this->cage.begin(), this->cage.end(), [](T* a, T* b) {
-            return a->getDaysLived() < b->getDaysLived();
+            if (a->getDaysLived() != b->getDaysLived()) {
+                return a->getDaysLived() < b->getDaysLived();
+            }
+            return a->getName() < b->getName();
         });
     }
 };
@@ -388,7 +394,10 @@ public:
 
     void sortAquarium() {
         sort(this->aquarium.begin(), this->aquarium.end(), [](T* a, T* b) {
-            return a->getDaysLived() < b->getDaysLived();
+            if (a->getDaysLived() != b->getDaysLived()) {
+                return a->getDaysLived() < b->getDaysLived();
+            }
+            return a->getName() < b->getName();
         });
     }
 };
