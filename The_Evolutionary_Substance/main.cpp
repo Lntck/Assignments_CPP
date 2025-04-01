@@ -47,7 +47,7 @@ public:
 };
 
 
-class BetterFish : public virtual Fish {
+class BetterFish : public Fish {
 public:
     BetterFish(const string name, int daysLived) : Animal(name, daysLived), Fish(name, daysLived) {}
     BetterFish(Fish& other) : Animal(other), Fish(other) {}
@@ -68,7 +68,7 @@ public:
 };
 
 
-class BetterBird : public virtual Bird {
+class BetterBird : public Bird {
 public:
     BetterBird(const string name, int daysLived) : Animal(name, daysLived), Bird(name, daysLived) {}
     BetterBird(Bird& other) : Animal(other), Bird(other) {}
@@ -89,7 +89,7 @@ public:
 };
 
 
-class BetterMouse : public virtual Mouse {
+class BetterMouse : public Mouse {
 public:
     BetterMouse(const string name, int daysLived) : Animal(name, daysLived), Mouse(name, daysLived) {}
     BetterMouse(Mouse& other) : Animal(other), Mouse(other) {}
@@ -102,8 +102,8 @@ public:
 
 class Monster : public virtual BetterFish, public virtual BetterBird, public virtual BetterMouse {
 public:
-    Monster(string name) : Animal(name, 0), Fish(name, 0), Bird(name, 0), Mouse(name, 0), BetterFish(name, 0), BetterBird(name, 0), BetterMouse(name, 0) {}
-    Monster(Animal& other) : Animal(other.getName(), 0), Fish(other.getName(), 0), Bird(other.getName(), 0), Mouse(other.getName(), 0), BetterFish(other.getName(), 0), BetterBird(other.getName(), 0), BetterMouse(other.getName(), 0) {}
+    Monster(string name) : Animal(name, 1), BetterFish(name, 1), BetterBird(name, 1), BetterMouse(name, 1) {}
+    Monster(Animal& other) : Monster(other.getName()) {}
 
     void attack(Animal& other) override {
         cout << "Monster is attacking\n";
@@ -133,8 +133,7 @@ public:
             if (this->freedom[i]->getDaysLived() > 10) {
                 deleteList.push_back(i);
             }
-            if (dynamic_cast<Monster*>(this->freedom[i]) && this->freedom[i]->getDaysLived() > 1) {
-                cout << "WORKS!\n";
+            if (dynamic_cast<Monster*>(this->freedom[i])) {
                 deleteList.push_back(i);
             }
         }
