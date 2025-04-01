@@ -522,12 +522,14 @@ int main() {
                 {
                     int pos;
                     string type, container;
-                    cin >> container >> type >> pos;
+                    cin >> container;
 
                     if (container[0] == 'F') {
+                        cin >> pos;
                         cout << "Substance cannot be applied in freedom\n";
                         break;
                     }
+                    cin >> type >> pos;
                     // Mouse
                     if (type == "M") {
                         // Cage
@@ -586,12 +588,14 @@ int main() {
                 {
                     int pos;
                     string type, container;
-                    cin >> container >> type >> pos;
+                    cin >> container;
 
                     if (container[0] == 'F') {
+                        cin >> pos;
                         cout << "Substance cannot be removed in freedom\n";
                         break;
                     }
+                    cin >> type >> pos;
                     // Mouse
                     if (type == "M") {
                         cout << "Invalid substance removal\n";
@@ -640,12 +644,14 @@ int main() {
                 {
                     int pos1, pos2;
                     string type, container;
-                    cin >> container >> type >> pos1 >> pos2;
+                    cin >> container;
 
                     if (container[0] == 'F') {
+                        cin >> pos1 >> pos2;
                         cout << "Animals cannot attack in Freedom\n";
                         break;
                     }
+                    cin >> type >> pos1 >> pos2;
                     // Mouse
                     if (type == "M") {
                         // Cage
@@ -779,29 +785,6 @@ int main() {
                     aquariumMouses.period();
                     aquariumBetterMouses.period();
                     freedom.period();
-                    break;
-                }
-            // PRINT
-            case 'I':
-                {
-                    cout << "Mouses\n";
-                    cageMouses.print();
-                    cout << "Mouses aqua\n";
-                    aquariumMouses.print();
-                    cout << "Better Mouses\n";
-                    cageBetterMouses.print();
-                    cout << " Beteer Mouses aqua\n";
-                    aquariumBetterMouses.print();
-                    cout << "Fish\n";
-                    aquariumFish.print();
-                    cout << "Better Fish\n";
-                    aquariumBetterFish.print();
-                    cout << "Birds\n";
-                    cageBirds.print();
-                    cout << "Better Birds\n";
-                    cageBetterBirds.print();
-                    cout << "Freedom\n";
-                    freedom.print();
                     break;
                 }
         }
