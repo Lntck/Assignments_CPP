@@ -253,6 +253,20 @@ public:
         this->kill_all();
     }
 
+    template <typename U>
+    void removeSubstance(int pos, Cage<U>& otherCage) {
+        if (pos < 0 || pos >= this->cage.size()) {
+            cout << "Animal not found\n";
+            return;
+        }
+
+        T* animal = this->cage[pos];
+        U* normalAnimal = new U(animal->getName(), animal->getDaysLived()*2);
+        otherCage.addAnimal(normalAnimal, 0);
+        this->cage.erase(this->cage.begin() + pos);
+        delete animal;
+    }
+
     void kill_all() {
         // Deleting all animals in the cage
         for (auto* animal : this->cage) {
@@ -348,6 +362,20 @@ public:
         Monster* monster = new Monster(*animal);
         freedom.addAnimal(monster, 0);
         this->kill_all();
+    }
+
+    template <typename U>
+    void removeSubstance(int pos, Aquarium<U>& otherAquarium) {
+        if (pos < 0 || pos >= this->aquarium.size()) {
+            cout << "Animal not found\n";
+            return;
+        }
+
+        T* animal = this->aquarium[pos];
+        U* normalAnimal = new U(animal->getName(), animal->getDaysLived()*2);
+        otherAquarium.addAnimal(normalAnimal, 0);
+        this->aquarium.erase(this->aquarium.begin() + pos);
+        delete animal;
     }
 
     void kill_all() {
@@ -550,9 +578,6 @@ int main() {
                     }
                     else { return 0; }
                     break;
-
-
-                    break;
                 }
             // REMOVE_SUBSTANCE
             case 'M':
@@ -562,10 +587,50 @@ int main() {
                     cin >> container >> type >> pos;
 
                     if (container[0] == 'F') {
-                        cout << "Animals cannot attack in Freedom\n";
+                        cout << "Substance cannot be removed in freedom\n";
                         break;
                     }
-
+                    // Mouse
+                    if (type == "M") {
+                        cout << "Invalid substance removal\n";
+                        break;
+                    }
+                    // Better Mouse
+                    else if (type == "BM") {
+                        // Cage
+                        if (container[0] == 'C') {
+                            cageBetterMouses.removeSubstance(pos, cageMouses);
+                        }
+                        // Aquarium
+                        else if (container[0] == 'A') {
+                            aquariumBetterMouses.removeSubstance(pos, aquariumMouses);
+                        }
+                    }
+                    // Fish
+                    else if (type == "F") {
+                        cout << "Invalid substance removal\n";
+                        break;
+                    }
+                    // Better Fish
+                    else if (type == "BF") {
+                        // Aquarium
+                        if (container[0] == 'A') {
+                            aquariumBetterFish.removeSubstance(pos, aquariumFish);
+                        }
+                    }
+                    // Bird
+                    else if (type == "B") {
+                        cout << "Invalid substance removal\n";
+                        break;
+                    }
+                    // Better Bird
+                    else if (type == "BB") {
+                        // Cage
+                        if (container[0] == 'C') {
+                            cageBetterBirds.removeSubstance(pos, cageBirds);
+                        }
+                    }
+                    else { return 0; }
                     break;
                 }
             // ATTACK
