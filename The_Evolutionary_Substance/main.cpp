@@ -1,3 +1,4 @@
+// Rushan Shafeev
 #include <iostream>
 #include <string>
 #include <vector>
@@ -6,7 +7,7 @@
 
 using namespace std;
 
-
+// Base class for all animals with common attributes and methods
 class Animal {
 private:
     const string name;
@@ -36,7 +37,7 @@ public:
     }
 };
 
-
+// Fish class, inherits from Animal
 class Fish : public virtual Animal {
 public:
     Fish(const string name, int daysLived) : Animal(name, daysLived) {}
@@ -46,7 +47,7 @@ public:
     }
 };
 
-
+// Enhanced version of Fish with different attack behavior
 class BetterFish : public Fish {
 public:
     BetterFish(const string name, int daysLived) : Animal(name, daysLived), Fish(name, daysLived) {}
@@ -57,7 +58,7 @@ public:
     }
 };
 
-
+// Bird class, inherits from Animal
 class Bird : public virtual Animal {
 public:
     Bird(const string name, int daysLived) : Animal(name, daysLived) {}
@@ -67,7 +68,7 @@ public:
     }
 };
 
-
+// Enhanced version of Bird with different attack behavior
 class BetterBird : public Bird {
 public:
     BetterBird(const string name, int daysLived) : Animal(name, daysLived), Bird(name, daysLived) {}
@@ -78,7 +79,7 @@ public:
     }
 };
 
-
+// Mouse class, inherits from Animal
 class Mouse : public virtual Animal {
 public:
     Mouse(const string name, int daysLived) : Animal(name, daysLived) {}
@@ -88,7 +89,7 @@ public:
     }
 };
 
-
+// Enhanced version of Mouse with different attack behavior
 class BetterMouse : public Mouse {
 public:
     BetterMouse(const string name, int daysLived) : Animal(name, daysLived), Mouse(name, daysLived) {}
@@ -98,8 +99,8 @@ public:
         cout << "BetterMouse is attacking\n";
     }
 };
-    
 
+// Monster class, inherits from BetterFish, BetterBird, and BetterMouse
 class Monster : public virtual BetterFish, public virtual BetterBird, public virtual BetterMouse {
 public:
     Monster(string name) : Animal(name, 1), BetterFish(name, 1), BetterBird(name, 1), BetterMouse(name, 1) {}
@@ -110,7 +111,7 @@ public:
     }
 };
 
-
+// Freedom container class to manage animals in a free environment
 template <typename T>
 class Freedom {
 private:
@@ -126,6 +127,7 @@ public:
         this->sortFreedom();
     }
 
+    // Increments days lived for all animals, removes those over 10 days or if they are Monsters
     void period() {
         auto i = freedom.begin();
         while (i != freedom.end()) {
@@ -156,10 +158,12 @@ public:
         this->freedom[index]->sayName();
     }
 
+    // Clears the freedom vector without deleting animals (potential memory leak)
     void kill_all() {
         this->freedom.clear();
     }
 
+    // Sorts animals by days lived (ascending), then by name (lexicographically)
     void sortFreedom() {
         sort(this->freedom.begin(), this->freedom.end(), [](T* a, T* b) {
             if (a->getDaysLived() != b->getDaysLived()) {
@@ -170,7 +174,7 @@ public:
     }
 };
 
-
+// Cage container class to manage animals in a confined environment
 template <typename T>
 class Cage {
 private:
@@ -186,6 +190,7 @@ public:
         this->sortCage();
     }
 
+    // Increments days lived for all animals, removes those over 10 days
     void period() {
         auto i = cage.begin();
         while (i != cage.end()) {
@@ -216,6 +221,7 @@ public:
         }
     }
 
+    // Makes animal at index1 attack animal at index2, then removes index2
     void attack(int index1, int index2) {
         if (index1 < 0 || index1 >= this->cage.size() || index2 < 0 || index2 >= this->cage.size()) {
             cout << "Animal not found\n";
@@ -226,6 +232,7 @@ public:
         this->cage.erase(this->cage.begin() + index2);
     }
 
+    // Transforms animal at pos into a better version and moves it to otherCage
     template <typename U>
     void applySubstance(int pos, Cage<U>& otherCage) {
         if (pos < 0 || pos >= this->cage.size()) {
@@ -240,6 +247,7 @@ public:
         delete animal;
     }
 
+    // Transforms animal at pos into a Monster, moves it to freedom, and clears the cage
     void applySubstance(int pos, Freedom<Animal>& freedom) {
         if (pos < 0 || pos >= this->cage.size()) {
             cout << "Animal not found\n";
@@ -252,6 +260,7 @@ public:
         this->kill_all();
     }
 
+    // Reverts animal at pos to its normal form and moves it to otherCage
     template <typename U>
     void removeSubstance(int pos, Cage<U>& otherCage) {
         if (pos < 0 || pos >= this->cage.size()) {
@@ -266,14 +275,15 @@ public:
         delete animal;
     }
 
+    // Deletes all animals in the cage and clears the vector
     void kill_all() {
-        // Deleting all animals in the cage
         for (auto* animal : this->cage) {
             delete animal;
         }
         this->cage.clear();
     }
 
+    // Sorts animals by days lived (ascending), then by name (lexicographically)
     void sortCage() {
         sort(this->cage.begin(), this->cage.end(), [](T* a, T* b) {
             if (a->getDaysLived() != b->getDaysLived()) {
@@ -284,7 +294,7 @@ public:
     }
 };
 
-
+// Aquarium container class to manage aquatic animals
 template <typename T>
 class Aquarium {
 private:
@@ -300,6 +310,7 @@ public:
         this->sortAquarium();
     }
 
+    // Increments days lived for all animals, removes those over 10 days
     void period() {
         auto i = aquarium.begin();
             while (i != aquarium.end()) {
@@ -330,6 +341,7 @@ public:
         }
     }
 
+    // Makes animal at index1 attack animal at index2, then removes index2
     void attack(int index1, int index2) {
         if (index1 < 0 || index1 >= this->aquarium.size() || index2 < 0 || index2 >= this->aquarium.size()) {
             cout << "Animal not found\n";
@@ -340,6 +352,7 @@ public:
         this->aquarium.erase(this->aquarium.begin() + index2);
     }
 
+    // Transforms animal at pos into a better version and moves it to otherAquarium
     template <typename U>
     void applySubstance(int pos, Aquarium<U>& otherAquarium) {
         if (pos < 0 || pos >= this->aquarium.size()) {
@@ -354,6 +367,7 @@ public:
         delete animal;
     }
 
+    // Transforms animal at pos into a Monster, moves it to freedom, and clears the aquarium
     void applySubstance(int pos, Freedom<Animal>& freedom) {
         if (pos < 0 || pos >= this->aquarium.size()) {
             cout << "Animal not found\n";
@@ -366,6 +380,7 @@ public:
         this->kill_all();
     }
 
+    // Reverts animal at pos to its normal form and moves it to otherAquarium
     template <typename U>
     void removeSubstance(int pos, Aquarium<U>& otherAquarium) {
         if (pos < 0 || pos >= this->aquarium.size()) {
@@ -380,14 +395,15 @@ public:
         delete animal;
     }
 
+    // Deletes all animals in the aquarium and clears the vector
     void kill_all() {
-        // Deleting all animals in the aquarium
         for (auto* animal : this->aquarium) {
             delete animal;
         }
         this->aquarium.clear();
     }
 
+    // Sorts animals by days lived (ascending), then by name (lexicographically)
     void sortAquarium() {
         sort(this->aquarium.begin(), this->aquarium.end(), [](T* a, T* b) {
             if (a->getDaysLived() != b->getDaysLived()) {
@@ -398,7 +414,7 @@ public:
     }
 };
 
-
+// Specialization to prevent Fish from being in a Cage
 template <>
 class Cage<Fish> {
 protected:
@@ -408,7 +424,7 @@ public:
     Cage(const Cage<Fish>& other) = delete;
 };
 
-
+// Specialization to prevent Bird from being in an Aquarium
 template <>
 class Aquarium<Bird> {
 protected:
@@ -418,7 +434,7 @@ public:
     Aquarium(const Aquarium<Bird>& other) = delete;
 };
 
-
+// Simulation class to manage all containers and handle operations
 class Simulation {
 private:
     Cage<Bird>* cageBirds;
@@ -454,6 +470,7 @@ public:
         delete freedom;
     }
 
+    // Creates a new animal based on type and adds it to the specified container
     void create() {
         int n;
         string type, name, in, container;
@@ -534,6 +551,7 @@ public:
         }
     }
 
+    // Applies a substance to an animal, transforming it into a better version or Monster
     void applySubstance() {
         int pos;
         string type, container;
@@ -597,6 +615,7 @@ public:
         }
     }
 
+    // Removes a substance from an animal, reverting it to its normal form
     void removeSubstance() {
         int pos;
         string type, container;
@@ -650,6 +669,7 @@ public:
         }
     }
 
+    // Makes one animal attack another in the specified container
     void attack() {
         int pos1, pos2;
         string type, container;
@@ -713,6 +733,7 @@ public:
         }
     }
 
+    // Makes an animal at the specified position speak
     void talk() {
         int pos;
         string type, container;
@@ -777,8 +798,9 @@ public:
         }
     }
 
+    // Adding +1 day to all animals in all containers
+    // and removing those that lived more than 10 days
     void period() {
-        // Adding +1 day to all animals in the Containers and sorting by days lived
         cageBirds->period();
         cageBetterBirds->period();
         cageMouses->period();
