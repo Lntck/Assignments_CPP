@@ -118,6 +118,7 @@ private:
 public:
     using value_type = T;
     Freedom() {}
+    ~Freedom() { this->kill_all();}
 
     void addAnimal(T* animal, int flag) {
         this->freedom.push_back(animal);
@@ -177,6 +178,7 @@ private:
 public:
     using value_type = T;
     Cage() {}
+    ~Cage() { this->kill_all();}
 
     void addAnimal(T* animal, int flag) {
         this->cage.push_back(animal);
@@ -220,8 +222,8 @@ public:
             return;
         }
         this->cage[index1]->attack(*this->cage[index2]);
-        this->cage.erase(this->cage.begin() + index2);
         delete this->cage[index2];
+        this->cage.erase(this->cage.begin() + index2);
     }
 
     template <typename U>
@@ -290,6 +292,7 @@ private:
 public:
     using value_type = T;
     Aquarium() {}
+    ~Aquarium() { this->kill_all();}
 
     void addAnimal(T* animal, int flag) {
         this->aquarium.push_back(animal);
@@ -333,8 +336,8 @@ public:
             return;
         }
         this->aquarium[index1]->attack(*this->aquarium[index2]);
-        this->aquarium.erase(this->aquarium.begin() + index2);
         delete this->aquarium[index2];
+        this->aquarium.erase(this->aquarium.begin() + index2);
     }
 
     template <typename U>
@@ -416,379 +419,394 @@ public:
 };
 
 
+class Simulation {
+private:
+    Cage<Bird>* cageBirds;
+    Cage<BetterBird>* cageBetterBirds;
+    Cage<Mouse>* cageMouses;
+    Cage<BetterMouse>* cageBetterMouses;
+    Aquarium<Fish>* aquariumFish;
+    Aquarium<BetterFish>* aquariumBetterFish;
+    Aquarium<Mouse>* aquariumMouses;
+    Aquarium<BetterMouse>* aquariumBetterMouses;
+    Freedom<Animal>* freedom;
+public:
+    Simulation() {
+        cageBirds = new Cage<Bird>();
+        cageBetterBirds = new Cage<BetterBird>();
+        cageMouses = new Cage<Mouse>();
+        cageBetterMouses = new Cage<BetterMouse>();
+        aquariumFish = new Aquarium<Fish>();
+        aquariumBetterFish = new Aquarium<BetterFish>();
+        aquariumMouses = new Aquarium<Mouse>();
+        aquariumBetterMouses = new Aquarium<BetterMouse>();
+        freedom = new Freedom<Animal>();
+    }
+    ~Simulation() {
+        delete cageBirds;
+        delete cageBetterBirds;
+        delete cageMouses;
+        delete cageBetterMouses;
+        delete aquariumFish;
+        delete aquariumBetterFish;
+        delete aquariumMouses;
+        delete aquariumBetterMouses;
+        delete freedom;
+    }
+
+    void create() {
+        int n;
+        string type, name, in, container;
+        cin >> type >> name >> in >> container >> n;
+        // Mouse
+        if (type == "M") {
+            // Cage
+            if (container[0] == 'C') {
+                cageMouses->addAnimal(new Mouse(name, n), 1);
+            }
+            // Aquarium
+            else if (container[0] == 'A') {
+                aquariumMouses->addAnimal(new Mouse(name, n), 1);
+            }
+            // Freedom
+            else if (container[0] == 'F') {
+                freedom->addAnimal(new Mouse(name, n), 1);
+            }
+        }
+        // Better Mouse
+        else if (type == "BM") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterMouses->addAnimal(new BetterMouse(name, n), 1);
+            }
+            // Aquarium
+            else if (container[0] == 'A') {
+                aquariumBetterMouses->addAnimal(new BetterMouse(name, n), 1);
+            }
+            // Freedom
+            else if (container[0] == 'F') {
+                freedom->addAnimal(new BetterMouse(name, n), 1);
+            }
+        }
+        // Fish
+        else if (type == "F") {
+            // Aquarium
+            if (container[0] == 'A') {
+                aquariumFish->addAnimal(new Fish(name, n), 1);
+            }
+            // Freedom
+            else if (container[0] == 'F') {
+                freedom->addAnimal(new Fish(name, n), 1);
+            }
+        }
+        // Better Fish
+        else if (type == "BF") {
+            // Aquarium
+            if (container[0] == 'A') {
+                aquariumBetterFish->addAnimal(new BetterFish(name, n), 1);
+            }
+            // Freedom
+            else if (container[0] == 'F') {
+                freedom->addAnimal(new BetterFish(name, n), 1);
+            }
+        }
+        // Bird
+        else if (type == "B") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBirds->addAnimal(new Bird(name, n), 1);
+            }
+            // Freedom
+            else if (container[0] == 'F') {
+                freedom->addAnimal(new Bird(name, n), 1);
+            }
+        }
+        // Better Bird
+        else if (type == "BB") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterBirds->addAnimal(new BetterBird(name, n), 1);
+            }
+            // Freedom
+            else if (container[0] == 'F') {
+                freedom->addAnimal(new BetterBird(name, n), 1);
+            }
+        }
+    }
+
+    void applySubstance() {
+        int pos;
+        string type, container;
+        cin >> container;
+
+        if (container[0] == 'F') {
+            cin >> pos;
+            cout << "Substance cannot be applied in freedom\n";
+            return;
+        }
+        cin >> type >> pos;
+        // Mouse
+        if (type == "M") {
+            // Cage
+            if (container[0] == 'C') {
+                cageMouses->applySubstance(pos, *cageBetterMouses);
+            }
+            // Aquarium
+            else if (container[0] == 'A') {
+                aquariumMouses->applySubstance(pos, *aquariumBetterMouses);
+            }
+        }
+        // Better Mouse
+        else if (type == "BM") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterMouses->applySubstance(pos, *freedom);
+            }
+            // Aquarium
+            else if (container[0] == 'A') {
+                aquariumBetterMouses->applySubstance(pos, *freedom);
+            }
+        }
+        // Fish
+        else if (type == "F") {
+            // Aquarium
+            if (container[0] == 'A') {
+                aquariumFish->applySubstance(pos, *aquariumBetterFish);
+            }
+        }
+        // Better Fish
+        else if (type == "BF") {
+            // Aquarium
+            if (container[0] == 'A') {
+                aquariumBetterFish->applySubstance(pos, *freedom);
+            }
+        }
+        // Bird
+        else if (type == "B") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBirds->applySubstance(pos, *cageBetterBirds);
+            }
+        }
+        // Better Bird
+        else if (type == "BB") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterBirds->applySubstance(pos, *freedom);
+            }
+        }
+    }
+
+    void removeSubstance() {
+        int pos;
+        string type, container;
+        cin >> container;
+
+        if (container[0] == 'F') {
+            cin >> pos;
+            cout << "Substance cannot be removed in freedom\n";
+            return;
+        }
+        cin >> type >> pos;
+        // Mouse
+        if (type == "M") {
+            cout << "Invalid substance removal\n";
+            return;
+        }
+        // Better Mouse
+        else if (type == "BM") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterMouses->removeSubstance(pos, *cageMouses);
+            }
+            // Aquarium
+            else if (container[0] == 'A') {
+                aquariumBetterMouses->removeSubstance(pos, *aquariumMouses);
+            }
+        }
+        // Fish
+        else if (type == "F") {
+            cout << "Invalid substance removal\n";
+            return;
+        }
+        // Better Fish
+        else if (type == "BF") {
+            // Aquarium
+            if (container[0] == 'A') {
+                aquariumBetterFish->removeSubstance(pos, *aquariumFish);
+            }
+        }
+        // Bird
+        else if (type == "B") {
+            cout << "Invalid substance removal\n";
+            return;
+        }
+        // Better Bird
+        else if (type == "BB") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterBirds->removeSubstance(pos, *cageBirds);
+            }
+        }
+    }
+
+    void attack() {
+        int pos1, pos2;
+        string type, container;
+        cin >> container;
+
+        if (container[0] == 'F') {
+            cin >> pos1 >> pos2;
+            cout << "Animals cannot attack in Freedom\n";
+            return;
+        }
+        cin >> type >> pos1 >> pos2;
+        // Mouse
+        if (type == "M") {
+            // Cage
+            if (container[0] == 'C') {
+                cageMouses->attack(pos1, pos2);
+            }
+            // Aquarium
+            else if (container[0] == 'A') {
+                aquariumMouses->attack(pos1, pos2);
+            }
+        }
+        // Better Mouse
+        else if (type == "BM") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterMouses->attack(pos1, pos2);
+            }
+            // Aquarium
+            else if (container[0] == 'A') {
+                aquariumBetterMouses->attack(pos1, pos2);
+            }
+        }
+        // Fish
+        else if (type == "F") {
+            // Aquarium
+            if (container[0] == 'A') {
+                aquariumFish->attack(pos1, pos2);
+            }
+        }
+        // Better Fish
+        else if (type == "BF") {
+            // Aquarium
+            if (container[0] == 'A') {
+                aquariumBetterFish->attack(pos1, pos2);
+            }
+        }
+        // Bird
+        else if (type == "B") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBirds->attack(pos1, pos2);
+            }
+        }
+        // Better Bird
+        else if (type == "BB") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterBirds->attack(pos1, pos2);
+            }
+        }
+    }
+
+    void talk() {
+        int pos;
+        string type, container;
+        cin >> container;
+        // Freedom
+        if (container[0] == 'F') {
+            cin >> pos;
+            freedom->talk(pos);
+            return;
+        }
+        cin >> type >> pos;
+        
+        // Mouse
+        if (type == "M") {
+            // Cage
+            if (container[0] == 'C') {
+                cageMouses->talk(pos);
+            }
+            // Aquarium
+            else if (container[0] == 'A') {
+                aquariumMouses->talk(pos);
+            }
+        }
+        // Better Mouse
+        else if (type == "BM") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterMouses->talk(pos);
+            }
+            // Aquarium
+            else if (container[0] == 'A') {
+                aquariumBetterMouses->talk(pos);
+            }
+        }
+        // Fish
+        else if (type == "F") {
+            // Aquarium
+            if (container[0] == 'A') {
+                aquariumFish->talk(pos);
+            }
+        }
+        // Better Fish
+        else if (type == "BF") {
+            // Aquarium
+            if (container[0] == 'A') {
+                aquariumBetterFish->talk(pos);
+            }
+        }
+        // Bird
+        else if (type == "B") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBirds->talk(pos);
+            }
+        }
+        // Better Bird
+        else if (type == "BB") {
+            // Cage
+            if (container[0] == 'C') {
+                cageBetterBirds->talk(pos);
+            }
+        }
+    }
+
+    void period() {
+        // Adding +1 day to all animals in the Containers and sorting by days lived
+        cageBirds->period();
+        cageBetterBirds->period();
+        cageMouses->period();
+        cageBetterMouses->period();
+        aquariumFish->period();
+        aquariumBetterFish->period();
+        aquariumMouses->period();
+        aquariumBetterMouses->period();
+        freedom->period();
+    }
+};
+
+
 int main() {
     int numberOfOperations;
     cin >> numberOfOperations;
 
-    Cage<Bird> cageBirds;
-    Cage<BetterBird> cageBetterBirds;
-    Cage<Mouse> cageMouses;
-    Cage<BetterMouse> cageBetterMouses;
-    Aquarium<Fish> aquariumFish;
-    Aquarium<BetterFish> aquariumBetterFish;
-    Aquarium<Mouse> aquariumMouses;
-    Aquarium<BetterMouse> aquariumBetterMouses;
-    Freedom<Animal> freedom;
+    Simulation simulation;
 
     for (int i = 0; i < numberOfOperations; i++) {
         string operation;
         cin >> operation;
-        switch(operation[2]) {
-            // CREATE
-            case 'E':
-                {   
-                    int n;
-                    string type, name, in, container;
-                    cin >> type >> name >> in >> container >> n;
-                    // Mouse
-                    if (type == "M") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageMouses.addAnimal(new Mouse(name, n), 1);
-                        }
-                        // Aquarium
-                        else if (container[0] == 'A') {
-                            aquariumMouses.addAnimal(new Mouse(name, n), 1);
-                        }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.addAnimal(new Mouse(name, n), 1);
-                        }
-                    }
-                    // Better Mouse
-                    else if (type == "BM") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterMouses.addAnimal(new BetterMouse(name, n), 1);
-                        }
-                        // Aquarium
-                        else if (container[0] == 'A') {
-                            aquariumBetterMouses.addAnimal(new BetterMouse(name, n), 1);
-                        }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.addAnimal(new BetterMouse(name, n), 1);
-                        }
-                    }
-                    // Fish
-                    else if (type == "F") {
-                        // Aquarium
-                        if (container[0] == 'A') {
-                            aquariumFish.addAnimal(new Fish(name, n), 1);
-                        }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.addAnimal(new Fish(name, n), 1);
-                        }
-                    }
-                    // Better Fish
-                    else if (type == "BF") {
-                        // Aquarium
-                        if (container[0] == 'A') {
-                            aquariumBetterFish.addAnimal(new BetterFish(name, n), 1);
-                        }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.addAnimal(new BetterFish(name, n), 1);
-                        }
-                    }
-                    // Bird
-                    else if (type == "B") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBirds.addAnimal(new Bird(name, n), 1);
-                        }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.addAnimal(new Bird(name, n), 1);
-                        }
-                    }
-                    // Better Bird
-                    else if (type == "BB") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterBirds.addAnimal(new BetterBird(name, n), 1);
-                        }
-                        // Freedom
-                        else if (container[0] == 'F') {
-                            freedom.addAnimal(new BetterBird(name, n), 1);
-                        }
-                    }
-                    else { return 0; }
-                    break;
-                }
-            // APPLY_SUBSTANCE
-            case 'P':
-                {
-                    int pos;
-                    string type, container;
-                    cin >> container;
-
-                    if (container[0] == 'F') {
-                        cin >> pos;
-                        cout << "Substance cannot be applied in freedom\n";
-                        break;
-                    }
-                    cin >> type >> pos;
-                    // Mouse
-                    if (type == "M") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageMouses.applySubstance(pos, cageBetterMouses);
-                        }
-                        // Aquarium
-                        else if (container[0] == 'A') {
-                            aquariumMouses.applySubstance(pos, aquariumBetterMouses);
-                        }
-                    }
-                    // Better Mouse
-                    else if (type == "BM") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterMouses.applySubstance(pos, freedom);
-                        }
-                        // Aquarium
-                        else if (container[0] == 'A') {
-                            aquariumBetterMouses.applySubstance(pos, freedom);
-                        }
-                    }
-                    // Fish
-                    else if (type == "F") {
-                        // Aquarium
-                        if (container[0] == 'A') {
-                            aquariumFish.applySubstance(pos, aquariumBetterFish);
-                        }
-                    }
-                    // Better Fish
-                    else if (type == "BF") {
-                        // Aquarium
-                        if (container[0] == 'A') {
-                            aquariumBetterFish.applySubstance(pos, freedom);
-                        }
-                    }
-                    // Bird
-                    else if (type == "B") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBirds.applySubstance(pos, cageBetterBirds);
-                        }
-                    }
-                    // Better Bird
-                    else if (type == "BB") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterBirds.applySubstance(pos, freedom);
-                        }
-                    }
-                    else { return 0; }
-                    break;
-                }
-            // REMOVE_SUBSTANCE
-            case 'M':
-                {
-                    int pos;
-                    string type, container;
-                    cin >> container;
-
-                    if (container[0] == 'F') {
-                        cin >> pos;
-                        cout << "Substance cannot be removed in freedom\n";
-                        break;
-                    }
-                    cin >> type >> pos;
-                    // Mouse
-                    if (type == "M") {
-                        cout << "Invalid substance removal\n";
-                        break;
-                    }
-                    // Better Mouse
-                    else if (type == "BM") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterMouses.removeSubstance(pos, cageMouses);
-                        }
-                        // Aquarium
-                        else if (container[0] == 'A') {
-                            aquariumBetterMouses.removeSubstance(pos, aquariumMouses);
-                        }
-                    }
-                    // Fish
-                    else if (type == "F") {
-                        cout << "Invalid substance removal\n";
-                        break;
-                    }
-                    // Better Fish
-                    else if (type == "BF") {
-                        // Aquarium
-                        if (container[0] == 'A') {
-                            aquariumBetterFish.removeSubstance(pos, aquariumFish);
-                        }
-                    }
-                    // Bird
-                    else if (type == "B") {
-                        cout << "Invalid substance removal\n";
-                        break;
-                    }
-                    // Better Bird
-                    else if (type == "BB") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterBirds.removeSubstance(pos, cageBirds);
-                        }
-                    }
-                    else { return 0; }
-                    break;
-                }
-            // ATTACK
-            case 'T':
-                {
-                    int pos1, pos2;
-                    string type, container;
-                    cin >> container;
-
-                    if (container[0] == 'F') {
-                        cin >> pos1 >> pos2;
-                        cout << "Animals cannot attack in Freedom\n";
-                        break;
-                    }
-                    cin >> type >> pos1 >> pos2;
-                    // Mouse
-                    if (type == "M") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageMouses.attack(pos1, pos2);
-                        }
-                        // Aquarium
-                        else if (container[0] == 'A') {
-                            aquariumMouses.attack(pos1, pos2);
-                        }
-                    }
-                    // Better Mouse
-                    else if (type == "BM") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterMouses.attack(pos1, pos2);
-                        }
-                        // Aquarium
-                        else if (container[0] == 'A') {
-                            aquariumBetterMouses.attack(pos1, pos2);
-                        }
-                    }
-                    // Fish
-                    else if (type == "F") {
-                        // Aquarium
-                        if (container[0] == 'A') {
-                            aquariumFish.attack(pos1, pos2);
-                        }
-                    }
-                    // Better Fish
-                    else if (type == "BF") {
-                        // Aquarium
-                        if (container[0] == 'A') {
-                            aquariumBetterFish.attack(pos1, pos2);
-                        }
-                    }
-                    // Bird
-                    else if (type == "B") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBirds.attack(pos1, pos2);
-                        }
-                    }
-                    // Better Bird
-                    else if (type == "BB") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterBirds.attack(pos1, pos2);
-                        }
-                    }
-                    else { return 0; }
-                    break;
-                }
-            // TALK
-            case 'L':
-                {
-                    int pos;
-                    string type, container;
-                    cin >> container;
-                    // Freedom
-                    if (container[0] == 'F') {
-                        cin >> pos;
-                        freedom.talk(pos);
-                        break;
-                    }
-                    cin >> type >> pos;
-                    
-                    // Mouse
-                    if (type == "M") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageMouses.talk(pos);
-                        }
-                        // Aquarium
-                        else if (container[0] == 'A') {
-                            aquariumMouses.talk(pos);
-                        }
-                    }
-                    // Better Mouse
-                    else if (type == "BM") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterMouses.talk(pos);
-                        }
-                        // Aquarium
-                        else if (container[0] == 'A') {
-                            aquariumBetterMouses.talk(pos);
-                        }
-                    }
-                    // Fish
-                    else if (type == "F") {
-                        // Aquarium
-                        if (container[0] == 'A') {
-                            aquariumFish.talk(pos);
-                        }
-                    }
-                    // Better Fish
-                    else if (type == "BF") {
-                        // Aquarium
-                        if (container[0] == 'A') {
-                            aquariumBetterFish.talk(pos);
-                        }
-                    }
-                    // Bird
-                    else if (type == "B") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBirds.talk(pos);
-                        }
-                    }
-                    // Better Bird
-                    else if (type == "BB") {
-                        // Cage
-                        if (container[0] == 'C') {
-                            cageBetterBirds.talk(pos);
-                        }
-                    }
-                    else { return 0; }
-                    break;
-                }
-            // PERIOD
-            case 'R':
-                {
-                    // Adding +1 day to all animals in the Containers and sorting by days lived
-                    cageBirds.period();
-                    cageBetterBirds.period();
-                    cageMouses.period();
-                    cageBetterMouses.period();
-                    aquariumFish.period();
-                    aquariumBetterFish.period();
-                    aquariumMouses.period();
-                    aquariumBetterMouses.period();
-                    freedom.period();
-                    break;
-                }
-        }
+        if (operation == "CREATE") { simulation.create();}
+        else if (operation == "APPLY_SUBSTANCE") { simulation.applySubstance();}
+        else if (operation == "REMOVE_SUBSTANCE") { simulation.removeSubstance();}
+        else if (operation == "ATTACK") { simulation.attack();}
+        else if (operation == "TALK") { simulation.talk();}
+        else if (operation == "PERIOD") { simulation.period();}
     }
-
     return 0;
 }
