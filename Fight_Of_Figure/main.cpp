@@ -6,7 +6,6 @@ using namespace std;
 
 
 class Figure;
-class Board;
 
 typedef struct {
     int x;
@@ -17,13 +16,11 @@ typedef struct {
 class State {
 protected:
     Figure *figure;
-    const string name = "State";
+    const string name;
 public:
-    State(Figure *figure) {
-        this->figure = figure;
-    }
+    State(Figure *figure, string name): figure(figure), name(name) {}
 
-    string getName() {
+    virtual string getName() const {
         return name;
     }
 
@@ -32,25 +29,23 @@ public:
 
 
 class Attacking : public State {
-private:
-    const string name = "ATTACKING";
 public:
-    Attacking(Figure *figure) : State(figure) {};
+    Attacking(Figure *figure) : State(figure, "ATTACKING") {};
 
     Coords move(string direction) override {
         Coords coords = {0, 0};
         switch(direction[0]) {
             case 'U':
-                coords.y -= 2;
-                break;
-            case 'D':
-                coords.y += 2;
-                break;
-            case 'L':
                 coords.x -= 2;
                 break;
-            case 'R':
+            case 'D':
                 coords.x += 2;
+                break;
+            case 'L':
+                coords.y -= 2;
+                break;
+            case 'R':
+                coords.y += 2;
                 break;
             default:
                 break;
@@ -61,25 +56,23 @@ public:
 
 
 class Normal : public State {
-private:
-    const string name = "NORMAL";
 public:
-    Normal(Figure *figure) : State(figure) {};
+    Normal(Figure *figure) : State(figure, "NORMAL") {};
 
     Coords move(string direction) override {
         Coords coords = {0, 0};
         switch(direction[0]) {
             case 'U':
-                coords.y -= 1;
-                break;
-            case 'D':
-                coords.y += 1;
-                break;
-            case 'L':
                 coords.x -= 1;
                 break;
-            case 'R':
+            case 'D':
                 coords.x += 1;
+                break;
+            case 'L':
+                coords.y -= 1;
+                break;
+            case 'R':
+                coords.y += 1;
                 break;
             default:
                 break;
@@ -95,6 +88,17 @@ enum figureType {
     GREENCLONE,
     REDCLONE
 };
+
+ostream& operator<<(ostream& os, figureType type) {
+    switch (type) {
+        case GREEN: os << "GREEN"; break;
+        case RED: os << "RED"; break;
+        case GREENCLONE: os << "GREENCLONE"; break;
+        case REDCLONE: os << "REDCLONE"; break;
+        default: os << "UNKNOWN"; break;
+    }
+    return os;
+}
 
 
 class Figure {
@@ -152,7 +156,7 @@ public:
         } else {
             this->state = new Normal(this);
         }
-        cout << type << " CHANGED STYLE TO " << this->state->getName();
+        cout << type << " CHANGED STYLE TO " << this->state->getName() << "\n";
     }
 
     Coords move(string direction) {
@@ -215,13 +219,13 @@ public:
                 redTeamScore += this->board[x][y].figure->getCoins();
             } else { greenTeamScore += this->board[x][y].figure->getCoins();}
             delete this->board[x][y].figure;
-            cout << figure->getType() << " MOVED TO " << x << " " << y << " AND KILLED " << this->board[x][y].figure->getType() << "\n";
+            cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << " AND KILLED " << this->board[x][y].figure->getType() << "\n";
         } else if (this->board[x][y].coin != nullptr) {
             figure->addCoins(this->board[x][y].coin->getValue());
-            cout << figure->getType() << " MOVED TO " << x << " " << y << " AND COLLECTED " << this->board[x][y].coin->getValue() << "\n";
+            cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << " AND COLLECTED " << this->board[x][y].coin->getValue() << "\n";
             delete this->board[x][y].coin;
         } else {
-            cout << figure->getType() << " MOVED TO " << x << " " << y << "\n";
+            cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << "\n";
         }
         this->board[x][y].figure = figure;
         figure->setX(x);
@@ -236,7 +240,7 @@ public:
 
     bool isEmpty(int x, int y) {
         if (!isValid(x, y)) { return false;}
-        return this->board[x][y].coin != nullptr && this->board[x][y].figure != nullptr;
+        return this->board[x][y].coin == nullptr && this->board[x][y].figure == nullptr;
     }
 };
 
@@ -284,7 +288,7 @@ public:
             } else {
                 figures.push_back(clone);
                 board->placeFigure(clone->getX(), clone->getY(), clone);
-                cout << type << " CLONED TO " << clone->getX() << " " << clone->getY() << "\n";
+                cout << type << " CLONED TO " << clone->getX()+1 << " " << clone->getY()+1 << "\n";
             }
         } else {
             cout << "INVALID ACTION\n";
@@ -298,6 +302,10 @@ public:
         } else {
             cout << "INVALID ACTION\n";
         }
+    }
+
+    void finish() {
+        // TO DO: make results of the game, need to check if figure died then coins added properly
     }
 };
 
@@ -319,10 +327,10 @@ int main() {
     int x, y, v;
     for (int i = 0; i < M; i++) {
         cin >> x >> y >> v;
-        coins.push_back(new Coin(x, y, v));
+        coins.push_back(new Coin(x-1, y-1, v));
     }
 
-    Game game(N, X_g, Y_g, X_r, Y_r, coins);
+    Game game(N, X_g-1, Y_g-1, X_r-1, Y_r-1, coins);
 
     cin >> P;
     for (int i = 0; i < P; i++) {
@@ -337,6 +345,6 @@ int main() {
             game.move(stringToFigureType(figure), action);
         }
     }
-
+    game.finish();
     return 0;
 }
