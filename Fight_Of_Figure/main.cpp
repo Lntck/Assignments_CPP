@@ -6,6 +6,13 @@ using namespace std;
 
 
 class Figure;
+class Board;
+
+typedef struct {
+    int x;
+    int y;
+} Coords;
+
 
 class State {
 protected:
@@ -20,7 +27,7 @@ public:
         return name;
     }
 
-    virtual void move() = 0;
+    virtual Coords move(string direction) = 0;
 };
 
 
@@ -30,8 +37,25 @@ private:
 public:
     Attacking(Figure *figure) : State(figure) {};
 
-    void move() override {
-
+    Coords move(string direction) override {
+        Coords coords = {0, 0};
+        switch(direction[0]) {
+            case 'U':
+                coords.y -= 2;
+                break;
+            case 'D':
+                coords.y += 2;
+                break;
+            case 'L':
+                coords.x -= 2;
+                break;
+            case 'R':
+                coords.x += 2;
+                break;
+            default:
+                break;
+        }
+        return coords;
     };
 };
 
@@ -42,8 +66,25 @@ private:
 public:
     Normal(Figure *figure) : State(figure) {};
 
-    void move() override {
-
+    Coords move(string direction) override {
+        Coords coords = {0, 0};
+        switch(direction[0]) {
+            case 'U':
+                coords.y -= 1;
+                break;
+            case 'D':
+                coords.y += 1;
+                break;
+            case 'L':
+                coords.x -= 1;
+                break;
+            case 'R':
+                coords.x += 1;
+                break;
+            default:
+                break;
+        }
+        return coords;
     };
 };
 
@@ -58,20 +99,64 @@ enum figureType {
 
 class Figure {
 private:
+    int x, y;
     State *state;
     figureType type;
+    bool isCloned = false;
+    int coinsCollected = 0;
 public:
-    Figure(State *state, figureType type) : state(new Normal(this)), type(type) {};
+    Figure(int x, int y, figureType type) : x(x), y(y), state(new Normal(this)), type(type) {};
 
     ~Figure() { delete state;}
 
+    Figure* clone() {
+        if (isCloned || type == GREENCLONE || type == REDCLONE) {
+            return nullptr;
+        }
+        return new Figure(y, x, type == GREEN ? GREENCLONE : REDCLONE);
+    }
+
+    int getX() {
+        return x;
+    }
+
+    int getY() {
+        return y;
+    }
+
+    figureType getType() {
+        return type;
+    }
+
+    int getCoins() {
+        return coinsCollected;
+    }
+
+    void addCoins(int v) {
+        this->coinsCollected += v;
+    }
+
+    void setX(int x) {
+        this->x = x;
+    }
+
+    void setY(int y) {
+        this->y = y;
+    }
+
     void ChangeStyle() {
-        if (this->state->getName() == "Normal") {
+        string style = this->state->getName();
+        delete this->state;
+        if (style == "NORMAL") {
             this->state = new Attacking(this);
         } else {
             this->state = new Normal(this);
         }
         cout << type << " CHANGED STYLE TO " << this->state->getName();
+    }
+
+    Coords move(string direction) {
+        return state->move(direction);
     }
 };
 
@@ -96,17 +181,134 @@ public:
 };
 
 
-class Board {
+typedef struct {
+    Figure* figure = nullptr;
+    Coin* coin = nullptr;
+} Cell;
 
+
+class Board {
+private:
+    int size;
+    vector<vector<Cell>> board;
+    int greenTeamScore = 0;
+    int redTeamScore = 0;
+public:
+    Board(int size): size(size) {
+        board.resize(size, vector<Cell>(size));
+    }
+
+    bool isValid(int x, int y) {
+        return x >= 0 && x < size && y >= 0 && y < size;
+    }
+
+    bool placeFigure(int x, int y, Figure* figure) {
+        if (!isValid(x, y)) { return false;}
+        this->board[x][y].figure = figure;
+        return true;
+    }
+
+    bool moveFigure(int x, int y, Figure* figure) {
+        if (!isValid(x, y)) { return false;}
+        if (this->board[x][y].figure != nullptr) {
+            if (this->board[x][y].figure->getType() == RED || this->board[x][y].figure->getType() == REDCLONE) {
+                redTeamScore += this->board[x][y].figure->getCoins();
+            } else { greenTeamScore += this->board[x][y].figure->getCoins();}
+            delete this->board[x][y].figure;
+            cout << figure->getType() << " MOVED TO " << x << " " << y << " AND KILLED " << this->board[x][y].figure->getType() << "\n";
+        } else if (this->board[x][y].coin != nullptr) {
+            figure->addCoins(this->board[x][y].coin->getValue());
+            cout << figure->getType() << " MOVED TO " << x << " " << y << " AND COLLECTED " << this->board[x][y].coin->getValue() << "\n";
+            delete this->board[x][y].coin;
+        } else {
+            cout << figure->getType() << " MOVED TO " << x << " " << y << "\n";
+        }
+        this->board[x][y].figure = figure;
+        figure->setX(x);
+        figure->setY(y);
+        return true;
+    }
+
+    void placeCoin(Coin* coin) {
+        if (!isValid(coin->getX(), coin->getY())) { return;}
+        this->board[coin->getX()][coin->getY()].coin = coin;
+    }
+
+    bool isEmpty(int x, int y) {
+        if (!isValid(x, y)) { return false;}
+        return this->board[x][y].coin != nullptr && this->board[x][y].figure != nullptr;
+    }
 };
 
 
 class Game {
 private:
+    Board* board;
+    vector<Figure*> figures;
+    vector<Coin*> coins;
 public:
+    Game(int size, int X_g, int Y_g, int X_r, int Y_r, vector<Coin*> coins) {
+        this->board = new Board(size);
+        this->coins = coins;
+        figures.push_back(new Figure(X_g, Y_g, GREEN));
+        figures.push_back(new Figure(X_r, Y_r, RED));
+        for(Coin* coin : coins) { board->placeCoin(coin);}
+        for(Figure* figure : figures) { board->placeFigure(figure->getX(), figure->getY(), figure);}
+    }
 
+    Figure* findFigure(figureType type) {
+        for (Figure* figure : figures) {
+            if (figure->getType() == type) {
+                return figure;
+            }
+        }
+        return nullptr;
+    }
+
+    void move(figureType type, string direction) {
+        Figure* figure = findFigure(type);
+        if (figure != nullptr) {
+            Coords newCoords = figure->move(direction);
+            board->moveFigure(newCoords.x + figure->getX(), newCoords.y + figure->getY(), figure);
+        } else {
+            cout << "INVALID ACTION\n";
+        }
+    }
+
+    void copy(figureType type) {
+        Figure* figure = findFigure(type);
+        if (figure != nullptr && type != GREENCLONE && type != REDCLONE && figure->getX() != figure->getY() && board->isEmpty(figure->getY(), figure->getX())) {
+            Figure* clone = figure->clone();
+            if (clone == nullptr) { 
+                cout << "INVALID ACTION\n";
+            } else {
+                figures.push_back(clone);
+                board->placeFigure(clone->getX(), clone->getY(), clone);
+                cout << type << " CLONED TO " << clone->getX() << " " << clone->getY() << "\n";
+            }
+        } else {
+            cout << "INVALID ACTION\n";
+        }
+    }
+
+    void changeStyle(figureType type) {
+        Figure* figure = findFigure(type);
+        if (figure != nullptr) {
+            figure->ChangeStyle();
+        } else {
+            cout << "INVALID ACTION\n";
+        }
+    }
 };
 
+
+figureType stringToFigureType(const string& figure) {
+    if (figure == "GREEN") return GREEN;
+    if (figure == "RED") return RED;
+    if (figure == "GREENCLONE") return GREENCLONE;
+    if (figure == "REDCLONE") return REDCLONE;
+    return (figureType) 404;
+}
 
 
 int main() {
@@ -120,11 +322,20 @@ int main() {
         coins.push_back(new Coin(x, y, v));
     }
 
+    Game game(N, X_g, Y_g, X_r, Y_r, coins);
+
     cin >> P;
     for (int i = 0; i < P; i++) {
         string figure, action;
+        cin >> figure >> action;
 
-
+        if (action == "COPY") {
+            game.copy(stringToFigureType(figure));
+        } else if (action == "STYLE") {
+            game.changeStyle(stringToFigureType(figure));
+        } else {
+            game.move(stringToFigureType(figure), action);
+        }
     }
 
     return 0;
