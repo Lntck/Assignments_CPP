@@ -118,6 +118,7 @@ public:
         if (isCloned || type == GREENCLONE || type == REDCLONE) {
             return nullptr;
         }
+        isCloned = true;
         return new Figure(y, x, type == GREEN ? GREENCLONE : REDCLONE);
     }
 
@@ -224,19 +225,26 @@ public:
     bool moveFigure(int x, int y, Figure* figure) {
         if (!isValid(x, y)) { return false;}
         if (this->board[x][y].figure != nullptr) {
+            if ((this->board[x][y].figure->getType() == RED && (figure->getType() == RED || figure->getType() == REDCLONE)) || 
+            (this->board[x][y].figure->getType() == GREEN && (figure->getType() == GREEN || figure->getType() == GREENCLONE))
+        ) {
+            return false;
+        }
             this->board[x][y].figure->Died();
+            figureType killedType = this->board[x][y].figure->getType();
             delete this->board[x][y].figure;
-            cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << " AND KILLED " << this->board[x][y].figure->getType() << "\n";
+            cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << " AND KILLED " << killedType << "\n";
         } else if (this->board[x][y].coin != nullptr) {
             figure->addCoins(this->board[x][y].coin->getValue());
             if (figure->getType() == RED || figure->getType() == REDCLONE) {
-                redTeamScore += figure->getCoins();
-            } else { greenTeamScore += figure->getCoins();}
+                redTeamScore += this->board[x][y].coin->getValue();
+            } else { greenTeamScore += this->board[x][y].coin->getValue();}
             cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << " AND COLLECTED " << this->board[x][y].coin->getValue() << "\n";
             delete this->board[x][y].coin;
         } else {
             cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << "\n";
         }
+        this->board[figure->getX()][figure->getY()].figure = nullptr;
         this->board[x][y].figure = figure;
         figure->setX(x);
         figure->setY(y);
@@ -291,7 +299,9 @@ public:
         Figure* figure = findFigure(type);
         if (figure != nullptr) {
             Coords newCoords = figure->move(direction);
-            board->moveFigure(newCoords.x + figure->getX(), newCoords.y + figure->getY(), figure);
+            if (!board->moveFigure(newCoords.x + figure->getX(), newCoords.y + figure->getY(), figure)) {
+                cout << "INVALID ACTION\n";
+            }
         } else {
             cout << "INVALID ACTION\n";
         }
@@ -327,11 +337,11 @@ public:
         int greenTeamScore = board->getGreenScore();
 
         if (redTeamScore > greenTeamScore) {
-            cout << "RED TEAM WINS. SCORE " << greenTeamScore << " " << redTeamScore;
+            cout << "RED TEAM WINS. SCORE " << greenTeamScore << " " << redTeamScore << "\n";
         } else if (redTeamScore < greenTeamScore) {
-            cout << "GREEN TEAM WINS. SCORE " << greenTeamScore << " " << redTeamScore;
+            cout << "GREEN TEAM WINS. SCORE " << greenTeamScore << " " << redTeamScore << "\n";
         } else {
-            cout << "TIE. SCORE " << greenTeamScore << " " << redTeamScore;
+            cout << "TIE. SCORE " << greenTeamScore << " " << redTeamScore << "\n";
         }
     }
 };
