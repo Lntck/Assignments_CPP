@@ -13,6 +13,7 @@ typedef struct {
 } Coords;
 
 
+
 class State {
 protected:
     Figure *figure;
@@ -222,17 +223,19 @@ public:
         return true;
     }
 
+    bool sameColor(int x, int y, Figure* figure) {
+        figureType type = this->board[x][y].figure->getType();
+        return ((((type == RED) || (type == REDCLONE)) && ((figure->getType() == RED || figure->getType() == REDCLONE))) ||
+        (((type == GREEN) || (type == GREENCLONE)) && ((figure->getType() == GREEN || figure->getType() == GREENCLONE))));
+    }
+
     bool moveFigure(int x, int y, Figure* figure) {
         if (!isValid(x, y)) { return false;}
         if (this->board[x][y].figure != nullptr) {
-            if ((this->board[x][y].figure->getType() == RED && (figure->getType() == RED || figure->getType() == REDCLONE)) || 
-            (this->board[x][y].figure->getType() == GREEN && (figure->getType() == GREEN || figure->getType() == GREENCLONE))
-        ) {
-            return false;
-        }
+            if (sameColor(x, y, figure)) { return false;}
             this->board[x][y].figure->Died();
             figureType killedType = this->board[x][y].figure->getType();
-            delete this->board[x][y].figure;
+            this->board[x][y].figure = nullptr;
             cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << " AND KILLED " << killedType << "\n";
         } else if (this->board[x][y].coin != nullptr) {
             figure->addCoins(this->board[x][y].coin->getValue());
@@ -240,7 +243,7 @@ public:
                 redTeamScore += this->board[x][y].coin->getValue();
             } else { greenTeamScore += this->board[x][y].coin->getValue();}
             cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << " AND COLLECTED " << this->board[x][y].coin->getValue() << "\n";
-            delete this->board[x][y].coin;
+            this->board[x][y].coin = nullptr;
         } else {
             cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << "\n";
         }
