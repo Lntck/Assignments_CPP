@@ -107,6 +107,7 @@ private:
     State *state;
     figureType type;
     bool isCloned = false;
+    bool isAlive = true;
     int coinsCollected = 0;
 public:
     Figure(int x, int y, figureType type) : x(x), y(y), state(new Normal(this)), type(type) {};
@@ -130,6 +131,14 @@ public:
 
     figureType getType() {
         return type;
+    }
+
+    bool getStatus() {
+        return isAlive;
+    }
+
+    void Died() {
+        this->isAlive = false;
     }
 
     int getCoins() {
@@ -215,13 +224,14 @@ public:
     bool moveFigure(int x, int y, Figure* figure) {
         if (!isValid(x, y)) { return false;}
         if (this->board[x][y].figure != nullptr) {
-            if (this->board[x][y].figure->getType() == RED || this->board[x][y].figure->getType() == REDCLONE) {
-                redTeamScore += this->board[x][y].figure->getCoins();
-            } else { greenTeamScore += this->board[x][y].figure->getCoins();}
+            this->board[x][y].figure->Died();
             delete this->board[x][y].figure;
             cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << " AND KILLED " << this->board[x][y].figure->getType() << "\n";
         } else if (this->board[x][y].coin != nullptr) {
             figure->addCoins(this->board[x][y].coin->getValue());
+            if (figure->getType() == RED || figure->getType() == REDCLONE) {
+                redTeamScore += figure->getCoins();
+            } else { greenTeamScore += figure->getCoins();}
             cout << figure->getType() << " MOVED TO " << x+1 << " " << y+1 << " AND COLLECTED " << this->board[x][y].coin->getValue() << "\n";
             delete this->board[x][y].coin;
         } else {
@@ -241,6 +251,14 @@ public:
     bool isEmpty(int x, int y) {
         if (!isValid(x, y)) { return false;}
         return this->board[x][y].coin == nullptr && this->board[x][y].figure == nullptr;
+    }
+
+    int getRedScore() {
+        return redTeamScore;
+    }
+
+    int getGreenScore() {
+        return greenTeamScore;
     }
 };
 
@@ -262,7 +280,7 @@ public:
 
     Figure* findFigure(figureType type) {
         for (Figure* figure : figures) {
-            if (figure->getType() == type) {
+            if (figure->getStatus() && figure->getType() == type) {
                 return figure;
             }
         }
@@ -305,7 +323,16 @@ public:
     }
 
     void finish() {
-        // TO DO: make results of the game, need to check if figure died then coins added properly
+        int redTeamScore = board->getRedScore();
+        int greenTeamScore = board->getGreenScore();
+
+        if (redTeamScore > greenTeamScore) {
+            cout << "RED TEAM WINS. SCORE " << greenTeamScore << " " << redTeamScore;
+        } else if (redTeamScore < greenTeamScore) {
+            cout << "GREEN TEAM WINS. SCORE " << greenTeamScore << " " << redTeamScore;
+        } else {
+            cout << "TIE. SCORE " << greenTeamScore << " " << redTeamScore;
+        }
     }
 };
 
